@@ -103,11 +103,11 @@ const SchedulingScreen: React.FC = () => {
   };
 
   const handleCreatePost = () => {
-    router.push('/scheduling/create-post');
+    router.push('/(tabs)/scheduling/create-post' as any);
   };
 
   const handlePostPress = (post: any) => {
-    router.push(`/scheduling/post-detail?id=${post.id}`);
+    router.push(`/(tabs)/scheduling/post-detail?id=${post.id}` as any);
   };
 
   const handleDeletePost = (postId: string) => {

@@ -1,5 +1,6 @@
 const express = require('express');
 const { body, validationResult } = require('express-validator');
+const bcrypt = require('bcryptjs');
 const User = require('../models/User');
 const { authenticate } = require('../middleware/auth');
 const router = express.Router();
@@ -41,9 +42,10 @@ router.get('/profile', authenticate, async (req, res) => {
 // Update user profile
 router.put('/profile', [
   authenticate,
-  body('firstName').optional().notEmpty().trim(),
-  body('lastName').optional().notEmpty().trim(),
-  body('username').optional().isLength({ min: 3, max: 30 }).trim()
+  body('firstName').optional().notEmpty().trim().withMessage('First name cannot be empty'),
+  body('lastName').optional().notEmpty().trim().withMessage('Last name cannot be empty'),
+  body('username').optional().isLength({ min: 3, max: 30 }).trim().withMessage('Username must be 3-30 characters'),
+  body('email').optional().isEmail().normalizeEmail().withMessage('Valid email required')
 ], async (req, res) => {
   try {
     const errors = validationResult(req);
@@ -51,7 +53,7 @@ router.put('/profile', [
       return res.status(400).json({ errors: errors.array() });
     }
 
-    const { firstName, lastName, username, avatar } = req.body;
+    const { firstName, lastName, username, email, avatar } = req.body;
     const userId = req.user.userId;
 
     // Check if username is being changed and if it's already taken
@@ -69,10 +71,26 @@ router.put('/profile', [
       }
     }
 
+    // Check if email is being changed and if it's already taken
+    if (email && email !== req.user.email) {
+      const existingEmail = await User.findOne({ 
+        email, 
+        _id: { $ne: userId } 
+      });
+      
+      if (existingEmail) {
+        return res.status(400).json({
+          error: 'Email already taken',
+          message: 'This email is already in use'
+        });
+      }
+    }
+
     const updateData = {};
     if (firstName) updateData.firstName = firstName;
     if (lastName) updateData.lastName = lastName;
     if (username) updateData.username = username;
+    if (email) updateData.email = email;
     if (avatar) updateData.avatar = avatar;
 
     const user = await User.findByIdAndUpdate(
@@ -158,7 +176,6 @@ router.put('/password', [
     }
 
     // Verify current password
-    const bcrypt = require('bcryptjs');
     const isCurrentPasswordValid = await bcrypt.compare(currentPassword, user.password);
     
     if (!isCurrentPasswordValid) {
@@ -189,6 +206,15 @@ router.delete('/account', authenticate, async (req, res) => {
   try {
     const userId = req.user.userId;
 
+    // Verify user exists before deletion
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({
+        error: 'User not found',
+        message: 'User account not found'
+      });
+    }
+
     // In a real app, you would:
     // 1. Delete all associated data (posts, accounts, etc.)
     // 2. Cancel any active subscriptions
@@ -202,7 +228,10 @@ router.delete('/account', authenticate, async (req, res) => {
     });
   } catch (error) {
     console.error('Delete account error:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    res.status(500).json({ 
+      error: 'Internal server error',
+      message: 'Failed to delete account'
+    });
   }
 });
 
