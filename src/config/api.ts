@@ -1,6 +1,10 @@
 import axios from 'axios';
 
-export const API_BASE_URL = 'http://localhost:3001/api';
+// Use live backend API
+export const API_BASE_URL = 'https://social-media-automation-api.onrender.com/api';
+
+// For local development, uncomment this line:
+// export const API_BASE_URL = 'http://localhost:3001/api';
 
 export const api = axios.create({
   baseURL: API_BASE_URL,
