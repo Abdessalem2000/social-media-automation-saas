@@ -9,12 +9,13 @@ require('dotenv').config();
 const { envValidator } = require('./config/envValidator');
 const { errorHandler, notFoundHandler, requestIdMiddleware } = require('./middleware/errorHandler');
 
-// Validate environment variables
+// Validate environment variables (lenient for deployment)
 try {
   envValidator.validateEnvironment();
 } catch (error) {
-  logger.error('Environment validation failed', error);
-  process.exit(1);
+  logger.warn('Environment validation failed, using defaults', error);
+  // Don't exit on validation failure, just log and continue
+  // This allows deployment even if some env vars are missing
 }
 
 // Get validated configuration

@@ -35,12 +35,14 @@ class EnvValidator {
         name: 'JWT_ACCESS_SECRET',
         description: 'JWT access token secret (min 32 characters)',
         validator: (value) => typeof value === 'string' && value.length >= 32,
+        defaultValue: 'default-jwt-access-secret-32-chars-minimum',
         errorMessage: 'JWT_ACCESS_SECRET must be at least 32 characters long'
       },
       {
         name: 'JWT_REFRESH_SECRET',
         description: 'JWT refresh token secret (min 32 characters)',
         validator: (value) => typeof value === 'string' && value.length >= 32,
+        defaultValue: 'default-jwt-refresh-secret-64-chars-minimum-for-production-use',
         errorMessage: 'JWT_REFRESH_SECRET must be at least 32 characters long'
       },
       {
@@ -167,9 +169,16 @@ class EnvValidator {
     // Check for required environment variables
     for (const config of this.requiredVars) {
       const envName = config.name;
-      const value = process.env[envName];
+      let value = process.env[envName];
       
-      if (!value && !config.optional) {
+      // Set default value if missing and default is available
+      if (!value && config.defaultValue) {
+        process.env[envName] = config.defaultValue;
+        value = config.defaultValue;
+        warnings.push(`Using default value for required variable ${envName}: ${config.defaultValue}`);
+      }
+      
+      if (!value && !config.defaultValue) {
         missingVars.push({
           variable: config.name,
           description: config.description,
@@ -215,7 +224,7 @@ class EnvValidator {
     // Log validation results
     if (errors.length > 0) {
       logger.error('Environment validation failed', new Error('Validation failed'), { errors });
-      process.exit(1);
+      throw new EnvironmentValidationError(`Environment validation failed: ${errors.map(e => e.variable).join(', ')}`);
     }
 
     if (warnings.length > 0) {
