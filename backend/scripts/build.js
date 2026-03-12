@@ -5,16 +5,14 @@
  * Prepares the application for production deployment
  */
 
-import { execSync } from 'child_process';
-import dotenv from 'dotenv';
-import fs from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
+const { execSync } = require('child_process');
+const dotenv = require('dotenv');
+const fs = require('fs');
+const path = require('path');
 
 // Load environment variables
 dotenv.config();
 
-const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 console.log('🔨 Starting production build process...\n');
@@ -170,7 +168,7 @@ function optimizePackageJson() {
     // Update scripts for production
     packageJson.scripts = {
       start: 'node server.js',
-      health: 'node -e "console.log(require(\"./server.js\")())"'
+      health: 'node -e "console.log(require(\'./server.js\')())"'
     };
     
     // Add production metadata
@@ -299,7 +297,6 @@ req.end();
 
   fs.writeFileSync(path.join(buildDir, 'health-check.js'), healthScript);
   console.log('   ✓ health-check.js created');
-
   console.log('✅ Health check script created\n');
 }
 
@@ -340,7 +337,7 @@ function generateBuildReport() {
   }
 
   scanDirectory(buildDir);
-
+  
   // Write report
   fs.writeFileSync(
     path.join(buildDir, 'build-report.json'),
@@ -380,18 +377,9 @@ function build() {
 }
 
 // Run build
-function main() {
-  build();
-}
+build();
 
-// Check if this is the main module
-if (import.meta.url) {
-  // This is an ES module
-  main();
-} else {
-  // This is CommonJS
-  main();
-}
-
-export { build };
-
+// Export for CommonJS
+module.exports = {
+  build
+};
