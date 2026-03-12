@@ -46,6 +46,9 @@ const SchedulingScreen: React.FC = () => {
 
   const [showCalendar, setShowCalendar] = useState(true);
   const [markedDates, setMarkedDates] = useState<Record<string, any>>({});
+  
+  // Initialize scrollY for animations
+  const scrollY = new Animated.Value(0);
 
   // Fetch posts from API on component mount
   useEffect(() => {
