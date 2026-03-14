@@ -1,10 +1,10 @@
 import axios from 'axios';
 
-// Use local backend for development (Render service is suspended)
-export const API_BASE_URL = 'http://localhost:3001/api';
+// Use live backend API (Render is reactivated!)
+export const API_BASE_URL = 'https://factory-management-project.onrender.com/api';
 
-// For production backend (when Render is reactivated), uncomment this line:
-// export const API_BASE_URL = 'https://social-media-automation-api.onrender.com/api';
+// For local development, uncomment this line:
+// export const API_BASE_URL = 'http://localhost:3001/api';
 
 export const api = axios.create({
   baseURL: API_BASE_URL,
