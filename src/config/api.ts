@@ -1,10 +1,10 @@
 import axios from 'axios';
 
-// Use live backend API (Render is reactivated!)
-export const API_BASE_URL = 'https://factory-management-project.onrender.com/api';
+// Use local backend with mock endpoints (correct for Social Media app)
+export const API_BASE_URL = 'http://localhost:3001/api';
 
-// For local development, uncomment this line:
-// export const API_BASE_URL = 'http://localhost:3001/api';
+// Factory Management backend (different project):
+// export const API_BASE_URL = 'https://factory-management-project.onrender.com/api';
 
 export const api = axios.create({
   baseURL: API_BASE_URL,
