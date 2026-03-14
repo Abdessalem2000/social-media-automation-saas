@@ -118,10 +118,57 @@ app.get('/api/analytics/overview', (req, res) => {
   res.json({
     success: true,
     data: {
-      totalPosts: 10,
-      scheduledPosts: 3,
-      publishedPosts: 7,
-      engagementRate: 4.5
+      overview: {
+        totalAccounts: 3,
+        totalPosts: 10,
+        publishedPosts: 7,
+        scheduledPosts: 3,
+        draftPosts: 0
+      },
+      engagement: {
+        totalLikes: 150,
+        totalComments: 45,
+        totalShares: 23,
+        totalViews: 1250,
+        totalReach: 890
+      },
+      platformStats: [
+        {
+          _id: 'twitter',
+          postCount: 5,
+          totalEngagement: 89
+        },
+        {
+          _id: 'instagram',
+          postCount: 3,
+          totalEngagement: 67
+        },
+        {
+          _id: 'facebook',
+          postCount: 2,
+          totalEngagement: 45
+        }
+      ],
+      accounts: [
+        {
+          platform: 'twitter',
+          accountName: '@testuser',
+          followers: 1250,
+          posts: 5
+        },
+        {
+          platform: 'instagram',
+          accountName: '@testuser',
+          followers: 890,
+          posts: 3
+        },
+        {
+          platform: 'facebook',
+          accountName: 'Test User',
+          followers: 456,
+          posts: 2
+        }
+      ]
     }
   });
 });
