@@ -14,9 +14,10 @@ export const api = axios.create({
   },
 });
 
-// Request interceptor to add auth token
+// Add debugging
 api.interceptors.request.use(
   (config) => {
+    console.log('🚀 API Request:', config.method?.toUpperCase(), config.baseURL + config.url);
     const token = getStoredToken();
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
@@ -24,14 +25,23 @@ api.interceptors.request.use(
     return config;
   },
   (error) => {
+    console.error('❌ Request Error:', error);
     return Promise.reject(error);
   }
 );
 
 // Response interceptor for error handling
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    console.log('✅ API Response:', response.config.url, response.status);
+    return response;
+  },
   (error) => {
+    console.error('❌ Response Error:', error.message);
+    if (error.response) {
+      console.error('❌ Response Status:', error.response.status);
+      console.error('❌ Response Data:', error.response.data);
+    }
     if (error.response?.status === 401) {
       // Token expired or invalid
       clearStoredToken();
@@ -42,27 +52,39 @@ api.interceptors.response.use(
   }
 );
 
-// Token storage helpers
+// Token storage helpers (React Native Web compatible)
 export const getStoredToken = (): string | null => {
   try {
-    return localStorage.getItem('authToken');
-  } catch {
+    // Try localStorage first (web)
+    if (typeof window !== 'undefined' && window.localStorage) {
+      return localStorage.getItem('authToken');
+    }
+    // Fallback for React Native
+    return null;
+  } catch (error) {
+    console.error('❌ Failed to get token:', error);
     return null;
   }
 };
 
 export const setStoredToken = (token: string): void => {
   try {
-    localStorage.setItem('authToken', token);
+    // Try localStorage first (web)
+    if (typeof window !== 'undefined' && window.localStorage) {
+      localStorage.setItem('authToken', token);
+    }
   } catch (error) {
-    console.error('Failed to store token:', error);
+    console.error('❌ Failed to store token:', error);
   }
 };
 
 export const clearStoredToken = (): void => {
   try {
-    localStorage.removeItem('authToken');
+    // Try localStorage first (web)
+    if (typeof window !== 'undefined' && window.localStorage) {
+      localStorage.removeItem('authToken');
+    }
   } catch (error) {
-    console.error('Failed to clear token:', error);
+    console.error('❌ Failed to clear token:', error);
   }
 };
